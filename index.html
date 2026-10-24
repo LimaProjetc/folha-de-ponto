@@ -1,0 +1,1118 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%233F63CC'/><text x='32' y='46' font-size='38' text-anchor='middle'>🕐</text></svg>"
+    />
+    <title>PontoSmart — Folha de Ponto Profissional</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body data-theme="dark">
+    <div class="toast-c" id="toastC"></div>
+
+    <!-- LOGIN -->
+    <div class="auth-wrap" id="scrLogin">
+      <div class="auth-card">
+        <div class="auth-logo">
+          <div class="auth-logo-icon">🕐</div>
+          <div>
+            <div class="auth-logo-text">PontoSmart</div>
+            <div class="auth-logo-sub">Sistema de Folha de Ponto</div>
+          </div>
+        </div>
+        <h1 class="auth-title">Bem-vindo de volta</h1>
+        <p class="auth-sub">Acesse sua conta para continuar</p>
+        <div class="alert alert-e" id="loginErr"></div>
+        <div class="fg">
+          <label class="fl">Usuário ou E-mail</label>
+          <div class="iw">
+            <input
+              type="text"
+              id="liU"
+              placeholder="nome usuario/Email"
+              autocomplete="username"
+              onkeydown="if (event.key === 'Enter') document.getElementById('liP').focus();"
+            />
+          </div>
+        </div>
+        <div class="fg">
+          <label class="fl">Senha</label>
+          <div class="iw">
+            <input
+              type="password"
+              id="liP"
+              placeholder="••••••••"
+              autocomplete="current-password"
+              onkeydown="if (event.key === 'Enter') doLogin();"
+            /><button class="eye" onclick="toggleEye('liP', this)">👁️</button>
+          </div>
+        </div>
+        <button class="btn btn-p" onclick="doLogin()">Entrar</button>
+        <div class="auth-links">
+          <span class="alink" onclick="showScr('scrForgot')">Esqueci minha senha</span
+          ><span class="alink" onclick="showScr('scrReg')">Criar conta</span>
+        </div>
+        <div style="margin-top: 16px; text-align: center">
+          <span class="alink" style="font-size: 11px; color: var(--text3)" onclick="resetDB()"
+            >⚙️ Problema técnico? Clique aqui</span
+          >
+        </div>
+      </div>
+    </div>
+
+    <!-- REGISTER -->
+    <div class="auth-wrap" id="scrReg" style="display: none">
+      <div class="auth-card">
+        <div class="auth-logo">
+          <div class="auth-logo-icon">🕐</div>
+          <div>
+            <div class="auth-logo-text">PontoSmart</div>
+            <div class="auth-logo-sub">Novo cadastro</div>
+          </div>
+        </div>
+        <h1 class="auth-title">Criar conta</h1>
+        <p class="auth-sub">Preencha os dados para se cadastrar</p>
+        <div class="alert alert-e" id="regErr"></div>
+        <div class="alert alert-s" id="regOk"></div>
+        <div class="fr">
+          <div class="fg fgi">
+            <label class="fl">Nome completo</label>
+            <div class="iw"><input type="text" id="rName" placeholder="João Silva" /></div>
+          </div>
+          <div class="fg fgi">
+            <label class="fl">Usuário</label>
+            <div class="iw"><input type="text" id="rUser" placeholder="joao.silva" /></div>
+          </div>
+        </div>
+        <div class="fg">
+          <label class="fl">E-mail</label>
+          <div class="iw"><input type="email" id="rEmail" placeholder="joao@outlook.com" /></div>
+        </div>
+        <div class="fr">
+          <div class="fg fgi">
+            <label class="fl">Salário Base (R$)</label>
+            <div class="iw">
+              <input type="number" id="rSal" placeholder="3500.00" step="0.01" />
+            </div>
+          </div>
+          <div class="fg fgi">
+            <label class="fl">Jornada (h/mês)</label>
+            <div class="iw"><input type="number" id="rJorn" placeholder="220" value="220" /></div>
+          </div>
+        </div>
+        <div class="fr">
+          <div class="fg fgi">
+            <label class="fl">Senha</label>
+            <div class="iw">
+              <input type="password" id="rPass" placeholder="••••••••" /><button
+                class="eye"
+                onclick="toggleEye('rPass', this)"
+              >
+                👁️
+              </button>
+            </div>
+          </div>
+          <div class="fg fgi">
+            <label class="fl">Confirmar senha</label>
+            <div class="iw">
+              <input type="password" id="rPass2" placeholder="••••••••" /><button
+                class="eye"
+                onclick="toggleEye('rPass2', this)"
+              >
+                👁️
+              </button>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-p" onclick="doRegister()">Criar conta</button>
+        <div class="auth-links" style="justify-content: center">
+          <span class="alink" onclick="showScr('scrLogin')">← Voltar ao login</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- FORGOT -->
+    <div class="auth-wrap" id="scrForgot" style="display: none">
+      <div class="auth-card">
+        <div class="auth-logo">
+          <div class="auth-logo-icon">🔑</div>
+          <div>
+            <div class="auth-logo-text">PontoSmart</div>
+            <div class="auth-logo-sub">Redefinir senha</div>
+          </div>
+        </div>
+        <h1 class="auth-title">Esqueceu a senha?</h1>
+        <p class="auth-sub">Informe seu e-mail ou usuário</p>
+        <div class="alert alert-e" id="fgErr"></div>
+        <div class="alert alert-s" id="fgOk"></div>
+        <div id="fgS1">
+          <div class="fg">
+            <label class="fl">E-mail ou usuário</label>
+            <div class="iw"><input type="text" id="fgId" placeholder="Usuario/ Email" /></div>
+          </div>
+          <button class="btn btn-p" onclick="fgStep1()">Continuar</button>
+        </div>
+        <div id="fgS2" style="display: none">
+          <div class="fg">
+            <label class="fl">Nova senha</label>
+            <div class="iw">
+              <input type="password" id="fgP1" placeholder="••••••••" /><button
+                class="eye"
+                onclick="toggleEye('fgP1', this)"
+              >
+                👁️
+              </button>
+            </div>
+          </div>
+          <div class="fg">
+            <label class="fl">Confirmar nova senha</label>
+            <div class="iw">
+              <input type="password" id="fgP2" placeholder="••••••••" /><button
+                class="eye"
+                onclick="toggleEye('fgP2', this)"
+              >
+                👁️
+              </button>
+            </div>
+          </div>
+          <button class="btn btn-p" onclick="fgStep2()">Redefinir senha</button>
+        </div>
+        <div class="auth-links" style="justify-content: center; margin-top: 18px">
+          <span class="alink" onclick="showScr('scrLogin')">← Voltar ao login</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- APP -->
+    <div class="app" id="mainApp">
+      <nav class="sidebar" id="sidebar">
+        <div class="sb-logo">
+          <div class="sb-icon">🕐</div>
+          <div>
+            <div class="sb-txt">PontoSmart</div>
+            <div class="sb-sub" id="sbPeriod">—</div>
+          </div>
+        </div>
+        <div class="sb-nav">
+          <div class="ns">Principal</div>
+          <div class="ni active" onclick="showPage('pHome')" data-p="pHome">
+            <span class="ni-ic">📊</span>Dashboard
+          </div>
+          <div class="ni" onclick="showPage('pLanc')" data-p="pLanc">
+            <span class="ni-ic">⏱️</span>Lançamento
+          </div>
+          <div class="ni" onclick="showPage('pHist')" data-p="pHist">
+            <span class="ni-ic">📅</span>Histórico
+          </div>
+          <div class="ns">Financeiro</div>
+          <div class="ni" onclick="showPage('pBanco')" data-p="pBanco">
+            <span class="ni-ic">🏦</span>Banco de Horas
+          </div>
+          <div class="ni" onclick="showPage('pAcum')" data-p="pAcum">
+            <span class="ni-ic">📆</span>Acumulado
+          </div>
+          <div class="ni" onclick="showPage('pHol')" data-p="pHol">
+            <span class="ni-ic">💰</span>Holerite
+          </div>
+          <div class="ns">Sistema</div>
+          <div class="ni" onclick="showPage('pExp')" data-p="pExp">
+            <span class="ni-ic">📤</span>Exportar
+          </div>
+          <div class="ni" onclick="showPage('pConf')" data-p="pConf">
+            <span class="ni-ic">⚙️</span>Configurações
+          </div>
+          <div id="admNav" style="display: none">
+            <div class="ns">Admin</div>
+            <div class="ni" onclick="showPage('pAdm')" data-p="pAdm">
+              <span class="ni-ic">👥</span>Usuários
+            </div>
+          </div>
+        </div>
+        <div class="sb-foot">
+          <div class="ucard" onclick="showPage('pConf')">
+            <div class="uav" id="uAv">?</div>
+            <div>
+              <div style="font-size: 13px; font-weight: 600" id="uName">—</div>
+              <div style="font-size: 11px; color: var(--text2)" id="uRole">Funcionário</div>
+            </div>
+          </div>
+          <div class="ni" onclick="doLogout()" style="margin-top: 4px; color: var(--red)">
+            <span class="ni-ic">🚪</span>Sair
+          </div>
+        </div>
+      </nav>
+
+      <div class="mc">
+        <div class="topbar">
+          <div class="tb-title" id="tbTitle">Dashboard</div>
+          <div class="theme-sw">
+            <div class="tdot dark active" onclick="setTheme('dark')" title="Escuro"></div>
+            <div class="tdot light" onclick="setTheme('light')" title="Claro"></div>
+            <div class="tdot green" onclick="setTheme('green')" title="Verde"></div>
+            <div class="tdot purple" onclick="setTheme('purple')" title="Roxo"></div>
+            <div class="tdot orange" onclick="setTheme('orange')" title="Laranja"></div>
+          </div>
+          <button class="tbtn" onclick="showPage('pExp')">📤 Exportar</button>
+          <button class="tbtn" onclick="backupJSON()">💾 Backup</button>
+        </div>
+
+        <!-- DASHBOARD -->
+        <div class="page active" id="pHome">
+          <div
+            style="
+              display: flex;
+              align-items: flex-start;
+              justify-content: space-between;
+              flex-wrap: wrap;
+              gap: 12px;
+              margin-bottom: 4px;
+            "
+          >
+            <div>
+              <div class="stitle" id="dashGreet">Olá! 👋</div>
+              <div class="ssub" id="dashDate" style="margin-bottom: 0">—</div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap">
+              <div style="font-size: 12px; color: var(--text2); font-weight: 600">
+                Visualizar mês:
+              </div>
+              <select
+                class="fc"
+                id="dashMes"
+                onchange="renderDash()"
+                style="max-width: 200px; padding: 7px 30px 7px 11px; font-size: 13px"
+              ></select>
+              <button
+                class="bs bo"
+                onclick="dashSetHoje()"
+                style="padding: 6px 12px; font-size: 12px"
+              >
+                📅 Mês Atual
+              </button>
+            </div>
+          </div>
+          <div
+            class="ssub"
+            style="
+              margin: 18px 0 8px;
+              font-weight: 700;
+              color: var(--text2);
+              text-transform: uppercase;
+              font-size: 11px;
+              letter-spacing: 0.5px;
+            "
+          >
+            📅 Este mês
+          </div>
+          <div class="sg" id="dashStats">
+            <div class="sc">
+              <div class="sl">Horas Trabalhadas</div>
+              <div class="sv sa" id="dHorasMes">0h 00m</div>
+              <div class="ssb">Meta: <span id="dMeta">—</span></div>
+              <div class="pb"><div class="pf" id="dProg" style="width: 0%"></div></div>
+            </div>
+            <div class="sc">
+              <div class="sl">Horas Positivas (Créditos)</div>
+              <div class="sv sp" id="dHorasPos">0h 00m</div>
+              <div class="ssb">Dias acima da jornada</div>
+            </div>
+            <div class="sc">
+              <div class="sl">Horas Negativas (Descontos)</div>
+              <div class="sv" id="dDebitoMes">0h 00m</div>
+              <div class="ssb" id="dDebitoSub">Horas faltantes</div>
+            </div>
+            <div class="sc">
+              <div class="sl">= Saldo do Mês</div>
+              <div class="sv" id="dBancoMes">0h 00m</div>
+              <div class="ssb" id="dBancoSub">Positivas − Negativas</div>
+            </div>
+          </div>
+          <div
+            class="ssub"
+            style="
+              margin: 4px 0 8px;
+              font-weight: 700;
+              color: var(--text2);
+              text-transform: uppercase;
+              font-size: 11px;
+              letter-spacing: 0.5px;
+            "
+          >
+            🏦 Banco de horas acumulado
+          </div>
+          <div class="sg" id="dashStats2">
+            <div class="sc">
+              <div class="sl">Extras 100% (Feriado/Dom)</div>
+              <div class="sv sp" id="dExtras">0h 00m</div>
+              <div class="ssb" id="dExtrasVal">Valor: R$ 0,00</div>
+            </div>
+            <div class="sc">
+              <div class="sl">Dias Trabalhados</div>
+              <div class="sv sa" id="dDias">0</div>
+              <div class="ssb" id="dDiasSub">de 0 úteis no mês</div>
+            </div>
+          </div>
+          <!-- elementos ocultos mantidos para o JS não quebrar -->
+          <div style="display: none">
+            <span id="dSaldoAnt"></span><span id="dSaldoAntSub"></span>
+            <span id="dSaldoTotal"></span><span id="dSaldoTotalSub"></span>
+          </div>
+          <div class="card">
+            <div class="ct">
+              📋 Lançamentos — <span id="dashMesLabel" style="color: var(--accent)">—</span>
+            </div>
+            <div class="tw" style="border: none">
+              <div class="tbody-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Dia</th>
+                      <th>Sem.</th>
+                      <th>Tipo</th>
+                      <th>Entrada</th>
+                      <th>S.Int.</th>
+                      <th>Ret.</th>
+                      <th>Saída</th>
+                      <th>Trabalhado</th>
+                      <th>Saldo</th>
+                      <th>Notas</th>
+                    </tr>
+                  </thead>
+                  <tbody id="dashRec"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LANÇAMENTO -->
+        <div class="page" id="pLanc">
+          <div class="stitle">⏱️ Lançamento de Ponto</div>
+          <div class="ssub">
+            Registre os horários do dia. Em fins de semana e feriados, marque se é Hora Extra.
+          </div>
+          <div class="card">
+            <div class="fr">
+              <div class="fg fgi">
+                <label class="fl">Mês/Ano</label
+                ><select class="fc" id="lMes" onchange="loadLanc()"></select>
+              </div>
+              <div class="fg fgi">
+                <label class="fl">Dia</label
+                ><select class="fc" id="lDia" onchange="loadDayRec()"></select>
+              </div>
+            </div>
+            <div
+              id="lDayInfo"
+              style="
+                margin-bottom: 14px;
+                display: none;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                flex-wrap: wrap;
+              "
+            >
+              <span class="chip" id="lSemana"></span>
+              <span
+                class="chip"
+                id="lTipoChip"
+                style="background: var(--accent-glow); color: var(--accent)"
+              ></span>
+            </div>
+            <div class="fr">
+              <div class="fg fgi">
+                <label class="fl">Observação / Tipo do Dia</label>
+                <select class="fc" id="lObs" onchange="onObsChange()">
+                  <option value="">— Dia Normal —</option>
+                  <option value="EXTRA_100">⭐ Hora Extra 100% (dia útil)</option>
+                  <option value="EXTRA_100_FERIADO">
+                    🗓️⭐ Hora Extra 100% — Feriado (trabalhou)
+                  </option>
+                  <option value="EXTRA_100_DOMINGO">
+                    ☀️⭐ Hora Extra 100% — Domingo (trabalhou)
+                  </option>
+                  <option value="FERIADO">🗓️ Feriado (não trabalhou)</option>
+                  <option value="FOLGA">🏖️ Folga / DSR</option>
+                  <option value="ATESTADO">🏥 Atestado Médico</option>
+                  <option value="FERIAS">✈️ Férias</option>
+                  <option value="BANCO_COMP">🏦 Compensação Banco de Horas</option>
+                  <option value="ABONO">✅ Abono</option>
+                  <option value="FALTA">❌ Falta não justificada</option>
+                </select>
+              </div>
+              <div class="fg fgi">
+                <label class="fl">Notas adicionais</label
+                ><input class="fc" type="text" id="lNota" placeholder="Observações..." />
+              </div>
+            </div>
+            <div id="lHorSection">
+              <div class="fr fr4">
+                <div class="fg fgi">
+                  <label class="fl">Entrada</label
+                  ><input class="fc" type="time" id="tE" step="60" oninput="updateCalc()" />
+                </div>
+                <div class="fg fgi">
+                  <label class="fl">Saída Intervalo</label
+                  ><input class="fc" type="time" id="tSI" step="60" oninput="updateCalc()" />
+                </div>
+                <div class="fg fgi">
+                  <label class="fl">Retorno</label
+                  ><input class="fc" type="time" id="tR" step="60" oninput="updateCalc()" />
+                </div>
+                <div class="fg fgi">
+                  <label class="fl">Saída Final</label
+                  ><input class="fc" type="time" id="tS" step="60" oninput="updateCalc()" />
+                </div>
+              </div>
+              <div
+                id="lCalc"
+                style="
+                  display: none;
+                  background: var(--surface2);
+                  border: 1px solid var(--border);
+                  border-radius: var(--rsm);
+                  padding: 14px 18px;
+                  margin-bottom: 14px;
+                "
+              >
+                <div style="display: flex; gap: 28px; flex-wrap: wrap; align-items: center">
+                  <div>
+                    <div
+                      style="
+                        font-size: 10px;
+                        color: var(--text2);
+                        font-weight: 700;
+                        text-transform: uppercase;
+                        margin-bottom: 2px;
+                      "
+                    >
+                      Trabalhado
+                    </div>
+                    <div style="font-size: 20px; font-weight: 800" id="cHoras">—</div>
+                  </div>
+                  <div>
+                    <div
+                      style="
+                        font-size: 10px;
+                        color: var(--text2);
+                        font-weight: 700;
+                        text-transform: uppercase;
+                        margin-bottom: 2px;
+                      "
+                    >
+                      Intervalo
+                    </div>
+                    <div style="font-size: 20px; font-weight: 800" id="cInt">—</div>
+                  </div>
+                  <div>
+                    <div
+                      style="
+                        font-size: 10px;
+                        color: var(--text2);
+                        font-weight: 700;
+                        text-transform: uppercase;
+                        margin-bottom: 2px;
+                      "
+                    >
+                      Jornada do Dia
+                    </div>
+                    <div style="font-size: 20px; font-weight: 800" id="cJorn">—</div>
+                  </div>
+                  <div>
+                    <div
+                      style="
+                        font-size: 10px;
+                        color: var(--text2);
+                        font-weight: 700;
+                        text-transform: uppercase;
+                        margin-bottom: 2px;
+                      "
+                    >
+                      Saldo
+                    </div>
+                    <div style="font-size: 22px; font-weight: 800" id="cSaldo">—</div>
+                  </div>
+                  <div id="cExtraBox" style="display: none">
+                    <div
+                      style="
+                        font-size: 10px;
+                        color: var(--green);
+                        font-weight: 700;
+                        text-transform: uppercase;
+                        margin-bottom: 2px;
+                      "
+                    >
+                      Extra 100%
+                    </div>
+                    <div style="font-size: 22px; font-weight: 800; color: var(--green)" id="cExtra">
+                      —
+                    </div>
+                  </div>
+                </div>
+                <div
+                  id="cAviso"
+                  style="margin-top: 8px; font-size: 11px; color: var(--yellow); display: none"
+                ></div>
+              </div>
+            </div>
+            <div style="display: flex; gap: 9px; flex-wrap: wrap">
+              <button class="bs ba" onclick="saveLanc()">💾 Salvar Registro</button>
+              <button class="bs bo" onclick="clearLanc()">🗑️ Limpar</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="ct">
+              📆 Todos os dias do mês — <span id="lMesLabel" style="color: var(--accent)"></span>
+            </div>
+            <div style="margin-bottom: 12px; font-size: 12px; color: var(--text2)">
+              🟢 Positivo &nbsp;🔴 Negativo &nbsp;<span
+                style="
+                  background: rgba(255, 184, 48, 0.12);
+                  color: var(--yellow);
+                  padding: 2px 8px;
+                  border-radius: 10px;
+                  font-size: 10px;
+                  font-weight: 700;
+                "
+                >FER</span
+              >
+              Feriado &nbsp;<span
+                style="
+                  background: rgba(255, 92, 106, 0.08);
+                  padding: 2px 8px;
+                  border-radius: 10px;
+                  font-size: 10px;
+                "
+                >FDS</span
+              >
+              Fim de semana &nbsp;<span
+                style="
+                  background: rgba(34, 216, 126, 0.08);
+                  padding: 2px 8px;
+                  border-radius: 10px;
+                  font-size: 10px;
+                "
+                >EXT</span
+              >
+              Extra 100%
+            </div>
+            <div class="tw" style="border: none">
+              <div class="tbody-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Dia</th>
+                      <th>Sem.</th>
+                      <th>Tipo</th>
+                      <th>Entrada</th>
+                      <th>S.Int.</th>
+                      <th>Ret.</th>
+                      <th>Saída</th>
+                      <th>Trabalhado</th>
+                      <th>Jornada</th>
+                      <th>H.Posit.</th>
+                      <th>H.Negat.</th>
+                      <th>Extra100%</th>
+                      <th>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody id="lTable"></tbody>
+                </table>
+              </div>
+            </div>
+            <div
+              id="lTotais"
+              style="
+                margin-top: 14px;
+                padding: 12px 16px;
+                background: var(--surface2);
+                border-radius: var(--rsm);
+                font-size: 13px;
+                display: flex;
+                gap: 24px;
+                flex-wrap: wrap;
+              "
+            ></div>
+          </div>
+        </div>
+
+        <!-- HISTÓRICO -->
+        <div class="page" id="pHist">
+          <div class="stitle">📅 Histórico Mensal</div>
+          <div class="ssub">Resumo de todos os meses registrados</div>
+          <div class="tw">
+            <div class="th">
+              <div class="tt">Resumo por Mês</div>
+              <input
+                class="si"
+                type="text"
+                placeholder="Filtrar mês..."
+                id="histSearch"
+                oninput="renderHist()"
+              />
+            </div>
+            <div class="tbody-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Mês/Ano</th>
+                    <th>D.Úteis</th>
+                    <th>D.Trab.</th>
+                    <th>H.Trabalhadas</th>
+                    <th>Jornada Mês</th>
+                    <th>H.Positivas</th>
+                    <th>H.Negativas</th>
+                    <th>Extra 100%</th>
+                    <th>Saldo Banco</th>
+                  </tr>
+                </thead>
+                <tbody id="histBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- BANCO DE HORAS -->
+        <div class="page" id="pBanco">
+          <div class="stitle">🏦 Banco de Horas</div>
+          <div class="ssub">Extrato completo de créditos e débitos</div>
+          <div class="sg">
+            <div class="sc">
+              <div class="sl">Saldo Total Acumulado</div>
+              <div class="sv" id="bTotal">0h 00m</div>
+              <div class="ssb" id="bTotSub">—</div>
+            </div>
+            <div class="sc">
+              <div class="sl">Total Créditos</div>
+              <div class="sv sp" id="bCred">0h 00m</div>
+            </div>
+            <div class="sc">
+              <div class="sl">Total Débitos</div>
+              <div class="sv sn" id="bDeb">0h 00m</div>
+            </div>
+          </div>
+          <!-- elementos ocultos para não quebrar o JS -->
+          <div style="display: none"><span id="bValor"></span><span id="bValorSub"></span></div>
+          <div class="tw">
+            <div class="th"><div class="tt">Extrato Mensal</div></div>
+            <div class="tbody-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Mês</th>
+                    <th>Créditos</th>
+                    <th>Débitos</th>
+                    <th>Saldo Mês</th>
+                    <th>Saldo Acumulado</th>
+                    <th>Extra 100% (h)</th>
+                    <th>Valor Extra 100%</th>
+                    <th>DSR s/ Extra 100%</th>
+                    <th>Total Extra 100% + DSR</th>
+                  </tr>
+                </thead>
+                <tbody id="bBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ACUMULADO POR PERÍODO -->
+        <div class="page" id="pAcum">
+          <div class="stitle">📆 Acumulado por Período</div>
+          <div class="ssub">
+            Calcule o banco de horas de períodos configuráveis (trimestral, semestral, etc.)
+          </div>
+          <div class="card">
+            <div class="ct">⚙️ Configurar Período</div>
+            <div class="fr">
+              <div class="fg fgi">
+                <label class="fl">Mês Inicial</label
+                ><select class="fc" id="acumI"></select>
+              </div>
+              <div class="fg fgi">
+                <label class="fl">Mês Final</label
+                ><select class="fc" id="acumF"></select>
+              </div>
+            </div>
+            <div class="fr">
+              <div class="fg fgi">
+                <label class="fl">Fechamento Rápido</label>
+                <select class="fc" id="acumPre" onchange="setAcumPre()">
+                  <option value="">— Selecionar atalho —</option>
+                  <option value="3">Trimestral (3 meses)</option>
+                  <option value="4">Quadrimestral (4 meses)</option>
+                  <option value="6">Semestral (6 meses)</option>
+                  <option value="12">Anual (12 meses)</option>
+                </select>
+              </div>
+              <div class="fg fgi" style="display: flex; align-items: flex-end">
+                <button class="bs ba" style="width: 100%" onclick="calcAcum()">
+                  📊 Calcular Período
+                </button>
+              </div>
+            </div>
+          </div>
+          <div id="acumResult" style="display: none">
+            <div class="sg" id="acumStats"></div>
+            <div class="tw">
+              <div class="th"><div class="tt" id="acumLabel">Detalhamento</div></div>
+              <div class="tbody-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Mês</th>
+                      <th>H.Trabalhadas</th>
+                      <th>Créditos</th>
+                      <th>Débitos</th>
+                      <th>Saldo Mês</th>
+                      <th>Extra 100%</th>
+                      <th>Saldo Acum.</th>
+                    </tr>
+                  </thead>
+                  <tbody id="acumBody"></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="card" id="acumFin"></div>
+          </div>
+        </div>
+
+        <!-- HOLERITE -->
+        <div class="page" id="pHol">
+          <div class="stitle">💰 Holerite</div>
+          <div class="ssub">Demonstrativo de pagamento mensal</div>
+          <div
+            style="
+              display: flex;
+              gap: 10px;
+              margin-bottom: 18px;
+              align-items: center;
+              flex-wrap: wrap;
+            "
+          >
+            <select class="fc" id="holMes" style="max-width: 210px" onchange="renderHol()"></select>
+            <button class="bs ba" onclick="exportHolPDF()">📄 Exportar PDF</button>
+          </div>
+          <div id="holContent" class="card">
+            <div style="text-align: center; color: var(--text2); padding: 24px">
+              Selecione um mês para visualizar
+            </div>
+          </div>
+        </div>
+
+        <!-- EXPORTAR -->
+        <div class="page" id="pExp">
+          <div class="stitle">📤 Exportar Dados</div>
+          <div class="ssub">Relatórios em PDF e Excel, backup e restauração</div>
+          <div class="card">
+            <div class="ct">🗓️ Período para exportação</div>
+            <div class="fr">
+              <div class="fg fgi">
+                <label class="fl">Mês Inicial</label
+                ><select class="fc" id="expI"></select>
+              </div>
+              <div class="fg fgi">
+                <label class="fl">Mês Final</label
+                ><select class="fc" id="expF"></select>
+              </div>
+            </div>
+          </div>
+          <div class="eg">
+            <div class="ec" onclick="exportExcel()">
+              <div class="ei">📊</div>
+              <div class="et">Excel (.xlsx)</div>
+              <div class="es">Folha de ponto completa por mês</div>
+            </div>
+            <div class="ec" onclick="exportPDF()">
+              <div class="ei">📄</div>
+              <div class="et">PDF Folha de Ponto</div>
+              <div class="es">Relatório formatado por período</div>
+            </div>
+            <div class="ec" onclick="exportHolPDF()">
+              <div class="ei">💰</div>
+              <div class="et">Holerite PDF</div>
+              <div class="es">Demonstrativo do mês selecionado</div>
+            </div>
+            <div class="ec" onclick="exportBancoPDF()">
+              <div class="ei">🏦</div>
+              <div class="et">Banco de Horas PDF</div>
+              <div class="es">Extrato completo acumulado</div>
+            </div>
+          </div>
+          <div class="sep"></div>
+          <div class="ct" style="margin-top: 4px">💾 Backup & Restauração</div>
+          <div class="eg">
+            <div class="ec" onclick="backupJSON()">
+              <div class="ei">⬇️</div>
+              <div class="et">Exportar Backup</div>
+              <div class="es">Salva todos os dados em arquivo .json no computador</div>
+            </div>
+            <div class="ec" onclick="document.getElementById('restoreFile').click()">
+              <div class="ei">⬆️</div>
+              <div class="et">Restaurar Backup</div>
+              <div class="es">Importa arquivo .json de backup anteriormente salvo</div>
+            </div>
+          </div>
+          <input
+            type="file"
+            id="restoreFile"
+            accept=".json"
+            style="display: none"
+            onchange="restoreJSON(event)"
+          />
+        </div>
+
+        <!-- CONFIGURAÇÕES -->
+        <div class="page" id="pConf">
+          <div class="stitle">⚙️ Configurações</div>
+          <div class="ssub">Dados da conta e parâmetros de cálculo</div>
+          <div class="card">
+            <div class="ct">👤 Dados Pessoais e Parâmetros</div>
+            <div class="fr">
+              <div class="fg fgi">
+                <label class="fl">Nome Completo</label><input class="fc" type="text" id="cfgName" />
+              </div>
+              <div class="fg fgi">
+                <label class="fl">E-mail</label><input class="fc" type="email" id="cfgEmail" />
+              </div>
+            </div>
+            <div class="fr">
+              <div class="fg fgi">
+                <label class="fl">Salário Base (R$)</label
+                ><input class="fc" type="number" id="cfgSal" step="0.01" />
+              </div>
+              <div class="fg fgi">
+                <label class="fl">Jornada Mensal (horas)</label
+                ><input class="fc" type="number" id="cfgJorn" />
+              </div>
+            </div>
+            <div class="fr">
+              <div class="fg fgi">
+                <label class="fl">Tolerância (minutos)</label
+                ><input class="fc" type="number" id="cfgTol" value="10" />
+              </div>
+              <div class="fg fgi">
+                <label class="fl">Modo Cálculo Jornada Diária</label>
+                <select class="fc" id="cfgModo" onchange="onModoChange()">
+                  <option value="clt30">CLT: Jornada ÷ 30 dias = 7h20m (recomendado)</option>
+                  <option value="div22">Fixo: Jornada ÷ 22 dias úteis = 10h</option>
+                  <option value="uteis">Automático: ÷ dias úteis reais do mês</option>
+                  <option value="manual">Manual: definir jornada diária abaixo</option>
+                </select>
+              </div>
+            </div>
+            <div class="fr" id="cfgManualRow" style="display: none">
+              <div class="fg fgi">
+                <label class="fl">Jornada Diária (horas e minutos)</label>
+                <input
+                  class="fc"
+                  type="time"
+                  id="cfgJornDia"
+                  value="07:20"
+                  step="60"
+                  placeholder="07:20"
+                />
+              </div>
+              <div class="fg fgi" style="display: flex; align-items: flex-end">
+                <div style="font-size: 12px; color: var(--text2); padding-bottom: 10px">
+                  Ex: 07:20 = 7h20m por dia trabalhado
+                </div>
+              </div>
+            </div>
+            <div
+              style="
+                background: var(--surface2);
+                border: 1px solid var(--border);
+                border-radius: var(--rsm);
+                padding: 12px 16px;
+                margin-bottom: 14px;
+                font-size: 12px;
+                color: var(--text2);
+              "
+              id="cfgModoInfo"
+            >
+              ℹ️ <strong>CLT 7h20m:</strong> 220h ÷ 30 = 7h20m por dia. Padrão para jornada de 44h
+              semanais com sábado incluído.
+            </div>
+            <button class="bs ba" onclick="saveConf()">💾 Salvar</button>
+          </div>
+          <div class="card">
+            <div class="ct">🔒 Alterar Senha</div>
+            <div class="fr">
+              <div class="fg fgi">
+                <label class="fl">Senha Atual</label>
+                <div class="iw">
+                  <input class="fc" type="password" id="pAt" /><button
+                    class="eye"
+                    onclick="toggleEye('pAt', this)"
+                  >
+                    👁️
+                  </button>
+                </div>
+              </div>
+              <div></div>
+            </div>
+            <div class="fr">
+              <div class="fg fgi">
+                <label class="fl">Nova Senha</label>
+                <div class="iw">
+                  <input class="fc" type="password" id="pNo" /><button
+                    class="eye"
+                    onclick="toggleEye('pNo', this)"
+                  >
+                    👁️
+                  </button>
+                </div>
+              </div>
+              <div class="fg fgi">
+                <label class="fl">Confirmar</label>
+                <div class="iw">
+                  <input class="fc" type="password" id="pNo2" /><button
+                    class="eye"
+                    onclick="toggleEye('pNo2', this)"
+                  >
+                    👁️
+                  </button>
+                </div>
+              </div>
+            </div>
+            <button class="bs ba" onclick="changePass()">🔒 Alterar Senha</button>
+          </div>
+        </div>
+
+        <!-- ADMIN -->
+        <div class="page" id="pAdm">
+          <div class="stitle">👥 Usuários</div>
+          <div class="ssub">Painel administrativo</div>
+
+          <!-- PAINEL BACKUP EM ARQUIVO -->
+          <div
+            style="
+              background: var(--surface2);
+              border: 1px solid var(--border);
+              border-radius: var(--r);
+              padding: 18px 20px;
+              margin-bottom: 20px;
+            "
+          >
+            <div style="font-weight: 700; font-size: 14px; margin-bottom: 4px">
+              💾 Backup Automático em Pasta Local
+            </div>
+            <div style="font-size: 12px; color: var(--text2); margin-bottom: 12px">
+              Vincule uma pasta do seu computador. O sistema salvará automaticamente um arquivo
+              <code>pontoSmart_dados.json</code> a cada alteração — sem depender da nuvem.
+            </div>
+            <div
+              id="fsStatus"
+              style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px"
+            >
+              Carregando...
+            </div>
+            <div style="margin-top: 10px; font-size: 11px; color: var(--text3)">
+              ⚠️ Requer Chrome ou Edge. Ao trocar de computador, copie o arquivo
+              <code>pontoSmart_dados.json</code> para a pasta vinculada e clique em
+              <strong>Restaurar backup</strong>.
+            </div>
+          </div>
+
+          <div class="tw">
+            <div class="th">
+              <div class="tt">Todos os Usuários</div>
+              <button class="bs ba" onclick="openModal('mAddU')">+ Adicionar</button>
+            </div>
+            <div class="tbody-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Nome</th>
+                    <th>Usuário</th>
+                    <th>E-mail</th>
+                    <th>Salário</th>
+                    <th>Jornada</th>
+                    <th>Role</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="admBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL ADICIONAR USUÁRIO -->
+    <div class="mo" id="mAddU">
+      <div class="md">
+        <div class="mh">
+          <div class="mt">Adicionar Usuário</div>
+          <button class="mc2" onclick="closeModal('mAddU')">✕</button>
+        </div>
+        <div class="fr">
+          <div class="fg fgi">
+            <label class="fl">Nome</label><input class="fc" type="text" id="auN" />
+          </div>
+          <div class="fg fgi">
+            <label class="fl">Usuário</label><input class="fc" type="text" id="auU" />
+          </div>
+        </div>
+        <div class="fg">
+          <label class="fl">E-mail</label><input class="fc" type="email" id="auE" />
+        </div>
+        <div class="fr">
+          <div class="fg fgi">
+            <label class="fl">Salário</label><input class="fc" type="number" id="auS" />
+          </div>
+          <div class="fg fgi">
+            <label class="fl">Jornada (h/mês)</label
+            ><input class="fc" type="number" id="auJ" value="220" />
+          </div>
+        </div>
+        <div class="fr">
+          <div class="fg fgi">
+            <label class="fl">Senha</label><input class="fc" type="password" id="auP" />
+          </div>
+          <div class="fg fgi">
+            <label class="fl">Role</label
+            ><select class="fc" id="auR">
+              <option value="user">Funcionário</option>
+              <option value="admin">Administrador</option>
+            </select>
+          </div>
+        </div>
+        <div class="mf">
+          <button class="bs bo" onclick="closeModal('mAddU')">Cancelar</button
+          ><button class="bs ba" onclick="addUserAdm()">Salvar</button>
+        </div>
+      </div>
+    </div>
+    <script src="js/script.js"></script>
+    <div
+      style="
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        text-align: center;
+        padding: 6px;
+        font-size: 11px;
+        color: var(--text3);
+        background: var(--surface);
+        border-top: 1px solid var(--border);
+        z-index: 10;
+        letter-spacing: 0.3px;
+      "
+    >
+      Developed by <strong style="color: var(--accent)">@Helber_sLima</strong> · PontoSmart &copy;
+      2026
+    </div>
+  </body>
+</html>
